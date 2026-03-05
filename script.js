@@ -1,5 +1,3 @@
-//// DANUBE 2019 - 2022 
-
 // Danube_Head = LAT = 45.357, LON = 28.022
 // Danube_Sulina (outlet) LAT = 45.15, LON = 29.67
 
@@ -14,8 +12,21 @@ var roi_point2 = ee.Geometry.Point(29.67, 45.15); // Danube_Sulina (outlet)
 //var roi_point2 = Danube_Sulina_adjusted - same as roi_point2 but based on the point creator tool, so need to provide coordinates 
 
 // Define the region of interest (ROI) as a polygon
-var roi_poly = Danube_domain; // created polygon on the GEE map
+// Define the new ROI polygon
+var roi_poly = ee.Geometry.Polygon([
+  [
+    [26.004639, 47.129951],
+    [25.43335, 45.966425],
+    [24.664307, 44.699898],
+    [30.750732, 43.004647],
+    [32.299805, 45.506347],
+    [26.004639, 47.129951]
+  ]
+]);
 
+// Optional: visualize
+Map.centerObject(roi_poly, 6); // Zoom out to see the whole polygon
+Map.addLayer(roi_poly, {color: 'blue'}, 'ROI Polygon');
 // Clip collection (Landsat 8 & 9, collection 2, tier 1, L2 imagery to ROI
 var l8 = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2');
 var l9 = ee.ImageCollection('LANDSAT/LC09/C02/T1_L2');
@@ -122,9 +133,9 @@ print('ST_B10_Celsius', sst_chart_celsius);
 
 
 //// Extracting SCENE_CENTER_TIME and DATE_ACQUIRED time series
-var sceneCenterTimeArray = Landsat_with_STcelsius_EMIS.aggregate_array('SCENE_CENTER_TIME');
-var dateAcquiredArray = Landsat_with_STcelsius_EMIS.aggregate_array('DATE_ACQUIRED');
-var systemIndexArray = Landsat_with_STcelsius_EMIS.aggregate_array('system:index');
+var sceneCenterTimeArray = Landsat_with_BT_celsius.aggregate_array('SCENE_CENTER_TIME');
+var dateAcquiredArray = Landsat_with_BT_celsius.aggregate_array('DATE_ACQUIRED');
+var systemIndexArray = Landsat_with_BT_celsius.aggregate_array('system:index');
 
 var featureCollection = ee.FeatureCollection(
   ee.List.sequence(0, sceneCenterTimeArray.length().subtract(1)).map(function(i) {
@@ -157,7 +168,7 @@ var ST_B10_celsius_offset = function(image) {
 };
 
 // Map the function over the image collection
-var Landsat_with_BT_celsius_offset = Landsat_with_STcelsius_EMIS.map(ST_B10_celsius_offset);
+var Landsat_with_BT_celsius_offset = Landsat_with_BT_celsius.map(ST_B10_celsius_offset);
 
 // Print the resulting collection
 print('Landsat_with_BT_celsius_offset', Landsat_with_BT_celsius_offset);
@@ -253,14 +264,15 @@ var samplePoint1 = roi_point;
 var extractTemperatures = function(image) {
   // Sample the temperature values at the point
   var temperatureValue = image.reduceRegion({
-    reducer: ee.Reducer.first(), // If you want the first value, change this to mean, median, etc.
+    reducer: ee.Reducer.first(),
     geometry: samplePoint1,
-    scale: 30, // Adjust scale as needed
-  });
-  // Return the image date and temperature value
+    scale: 30,
+  }).get('Temp_celsius_final');  // <-- get the value immediately
+
+  // Return a Feature with client-ready property
   return ee.Feature(null, {
-    date: image.date(),
-    temperature: temperatureValue.get('Temp_celsius_final') 
+    'date': image.date().format('YYYY-MM-dd'),  // format as string
+    'temperature': temperatureValue              // assign the numeric value
   });
 };
 
@@ -292,14 +304,15 @@ var samplePoint2 = roi_point2;
 var extractTemperatures = function(image) {
   // Sample the temperature values at the point
   var temperatureValue = image.reduceRegion({
-    reducer: ee.Reducer.first(), // If you want the first value, change this to mean, median, etc.
-    geometry: samplePoint2,
-    scale: 30, // Adjust scale as needed
-  });
-  // Return the image date and temperature value
+    reducer: ee.Reducer.first(),
+    geometry: samplePoint1,
+    scale: 30,
+  }).get('Temp_celsius_final');  // <-- get the value immediately
+
+  // Return a Feature with client-ready property
   return ee.Feature(null, {
-    date: image.date(),
-    temperature: temperatureValue.get('Temp_celsius_final') 
+    'date': image.date().format('YYYY-MM-dd'),  // format as string
+    'temperature': temperatureValue              // assign the numeric value
   });
 };
 
