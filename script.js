@@ -1,5 +1,4 @@
-//Replace ROI with your real region of interest and replace details with the correspondant information
-// Define map center within ROI
+// Replace the ROI with your actual region of interest and update the parameters below with the corresponding values for your study area.// Define map center within ROI
 Map.setCenter(29.67, 45.15, 9);
 
 // Define the region of interest (ROI) - Delta
