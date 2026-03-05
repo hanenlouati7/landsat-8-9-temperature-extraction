@@ -1,15 +1,14 @@
-// Define map center within Danube ROI
+//Replace ROI with your real region of interest and replace details with the correspondant information
+// Define map center within ROI
 Map.setCenter(29.67, 45.15, 9);
 
-// Define the region of interest (ROI) - Danube Delta
+// Define the region of interest (ROI) - Delta
 // add as many point as needed then adjust in the script
 // you can also use the point creator tool in the GEE map when assigning a point variable
-var roi_point = ee.Geometry.Point(28.022, 45.357); // Danube_Head
-var roi_point2 = ee.Geometry.Point(29.67, 45.15); // Danube_Sulina (outlet)
-//var roi_point2 = Danube_Sulina_adjusted - same as roi_point2 but based on the point creator tool, so need to provide coordinates 
+var roi_point = ee.Geometry.Point(28.022, 45.357); // ROI_Head
+var roi_point2 = ee.Geometry.Point(29.67, 45.15); // ROI (outlet)
 
 // Define the region of interest (ROI) as a polygon
-// Define the new ROI polygon
 var roi_poly = ee.Geometry.Polygon([
   [
     [26.004639, 47.129951],
@@ -31,7 +30,7 @@ var l8_9 = ee.ImageCollection(l8.merge(l9))
                   .filter(ee.Filter.date('2019-01-01', '2022-12-31')) // change this
                   .sort('DATE_ACQUIRED')
                   .filter(ee.Filter.or(
-                                ee.Filter.and(ee.Filter.eq('WRS_PATH', 181),     // change WRS_path and WRS_row depending on the study area  
+                                ee.Filter.and(ee.Filter.eq('WRS_PATH', 181),     // change WRS_path and WRS_row depending on the ROI
                                 ee.Filter.eq('WRS_ROW', 28)),
                                 ee.Filter.and(ee.Filter.eq('WRS_PATH', 181), 
                                 ee.Filter.eq('WRS_ROW', 29)),
@@ -120,7 +119,7 @@ var sst_chart_celsius = ui.Chart.image.series({
   interpolateNulls: true,
   lineWidth: 1,
   pointSize: 3,
-  title: 'SST trial (Landsat 8/9, atmospherically corrected, Danube_Head, no offset)',
+  title: 'SST trial (Landsat 8/9, atmospherically corrected, ROI_Head, no offset)',
   vAxis: { title: 'Surface Temp (in Celsius)' },
   hAxis: { title: 'Date', format: 'YYYY-MMM', gridlines: { count: 12 } },
 });
@@ -290,7 +289,7 @@ var temperatureChart = ui.Chart.feature.byFeature({
 });
 
 // Display the chart
-print(temperatureChart, "temp_final_mosaicked by date, Danube (Head)");
+print(temperatureChart, "temp_final_mosaicked by date, ROI_(Head)");
 
 
 
@@ -341,12 +340,12 @@ var final_data = ic_m
 
 // defining export parameters
 var exportArgs = {
-  folder: "Danube_2020",
+  folder: "ROI_2020",
   region: roi_poly,
   scale: 30,
   crs: "epsg:4326", // WGS84
   fileFormat: "GeoTIFF",
-  maxPixels: 1e9, // for Danube
+  maxPixels: 1e9, // for 
   formatOptions: {
     cloudOptimized: true
   }
@@ -368,7 +367,7 @@ for(var i = 0; i<numImages; i++) {
   
   exportArgs.image = image;
   
-  exportArgs.fileNamePrefix = "temperature_Danube_" + date.getInfo();
+  exportArgs.fileNamePrefix = "temperature_ROI" + date.getInfo();
 
   
 // export the images - THIS IS THE FINAL OUTPUT
@@ -388,7 +387,7 @@ var dateAndTimeCollection = Landsat_with_BT_celsius_offset_masked.map(function(i
 
 Export.table.toDrive({
   collection: dateAndTimeCollection,
-  description: 'Date_SceneCenterTime_Danube',
-  folder: 'SurfaceTemp_GEE_Danube', // Adjust the folder as needed
+  description: 'Date_SceneCenterTime_ROI', //adjust folder name
+  folder: 'SurfaceTemp_GEE_ROI', // Adjust the folder as needed
   fileFormat: 'CSV'
 });
