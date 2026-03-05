@@ -121,24 +121,6 @@ The script will automatically:
 
 ---
 
-## Workflow Description
-
-The workflow consists of the following steps:
-
-1. Define the region of interest and sample points
-2. Load Landsat 8 and 9 Level-2 image collections
-3. Filter images by date and spatial extent
-4. Apply cloud masking using the QA_PIXEL band
-5. Apply radiometric scaling to optical and thermal bands
-6. Convert thermal band ST_B10 from Kelvin to Celsius
-7. Apply empirical temperature offset correction
-8. Mask land pixels using Copernicus Land Cover data
-9. Mosaic scenes acquired on the same day
-10. Extract temperature values at sample points
-11. Export temperature rasters to Google Drive
-
----
-
 ## Outputs
 
 The script produces the following outputs:
