@@ -363,7 +363,7 @@ for(var i = 0; i<numImages; i++) {
   
   // get the date of the image
 //  var date = ee.Date(image.get('DATE_ACQUIRED')).format('yyyy-mm-dd');
-  var date = ee.Date(image.get('system:time_start')).format('yyyy-mm-dd');
+  var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd');
 
   
   exportArgs.image = image;
