@@ -1,6 +1,3 @@
-// Danube_Head = LAT = 45.357, LON = 28.022
-// Danube_Sulina (outlet) LAT = 45.15, LON = 29.67
-
 // Define map center within Danube ROI
 Map.setCenter(29.67, 45.15, 9);
 
