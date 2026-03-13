@@ -334,7 +334,7 @@ print(temperatureChart, "temp_final_mosaicked by date, Sulina (outlet)");
 
 //// EXPORT IN GEOTIFF FORMAT - 1 month/year per batch ////
 var final_data = ic_m
-.filterDate("2020-11-20", "2020-11-23") // change this
+.filterDate("2020-01-01", "2020-12-31") // change this for a one year extraction
 .select('Temp_celsius_final');
 
 // defining export parameters
