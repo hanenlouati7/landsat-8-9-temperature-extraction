@@ -21,12 +21,12 @@ var roi_poly = ee.Geometry.Polygon([
 
 // Optional: visualize
 Map.centerObject(roi_poly, 6); // Zoom out to see the whole polygon
-Map.addLayer(roi_poly, {color: 'blue'}, 'ROI Polygon');
+Map.addLayer(roi_poly, {color: 'blue'}, 'ROI Polygon'); //add blue color to layer
 // Clip collection (Landsat 8 & 9, collection 2, tier 1, L2 imagery to ROI
 var l8 = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2');
 var l9 = ee.ImageCollection('LANDSAT/LC09/C02/T1_L2');
 var l8_9 = ee.ImageCollection(l8.merge(l9))
-                  .filter(ee.Filter.date('2019-01-01', '2022-12-31')) // change this
+                  .filter(ee.Filter.date('2019-01-01', '2022-12-31')) // change this with you dates of interest
                   .sort('DATE_ACQUIRED')
                   .filter(ee.Filter.or(
                                 ee.Filter.and(ee.Filter.eq('WRS_PATH', 181),     // change WRS_path and WRS_row depending on the ROI
@@ -37,7 +37,7 @@ var l8_9 = ee.ImageCollection(l8.merge(l9))
                                 ee.Filter.eq('WRS_ROW', 28)),
                                 ee.Filter.and(ee.Filter.eq('WRS_PATH', 180), 
                                 ee.Filter.eq('WRS_ROW', 29))))
-                  .filterBounds(roi_poly);
+                  .filterBounds(roi_poly);//keep this
 print ('selected paths, no cmask', l8_9);
                   
 function clp(img) {
