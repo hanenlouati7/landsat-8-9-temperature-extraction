@@ -24,7 +24,7 @@ var roi_poly = ee.Geometry.Polygon([
 var l8 = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2');
 var l9 = ee.ImageCollection('LANDSAT/LC09/C02/T1_L2');
 var l8_9 = ee.ImageCollection(l8.merge(l9))
-                  .filter(ee.Filter.date('2020-01-01', '2023-09-30')) // change this
+                  .filter(ee.Filter.date('2020-01-01', '2023-09-30')) // keep this period for the time range you want 
                   .sort('DATE_ACQUIRED')
                   .filter(ee.Filter.or(
                                 ee.Filter.and(ee.Filter.eq('WRS_PATH', 191),     // change WRS_path and WRS_row depending on the study area  
@@ -189,7 +189,7 @@ print (Landsat_with_BT_celsius_offset_masked, 'Landsat_with_BT_celsius_offset_ma
 ////////////// MOSAICKING OVERLAPPING SCENES FOR FINAL TEMPERATURE //////////////
 // https://gis.stackexchange.com/questions/280156/mosaicking-image-collection-by-date-day-in-google-earth-engine
 var roi = roi_poly;
-
+//keep this period for the time range you want 
 var start = ee.Date('2020-01-01'); // change date
 var finish = ee.Date('2023-09-30'); // change date
 
@@ -328,7 +328,7 @@ print(temperatureChart, "temp_final_mosaicked by date, Fiumicino");
 
 //// EXPORT IN GEOTIFF FORMAT - 1 month/year per batch ////
 var final_data = ic_m
-.filterDate("2023-01-01", "2023-01-10")  // change this
+.filterDate("2023-01-01", "2023-01-10")  // change this to a short period of time, one year maximum  so GEE server  don't crash
 .select('Temp_celsius_final');
 
 // defining export parameters
