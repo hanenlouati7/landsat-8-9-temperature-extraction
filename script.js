@@ -1,43 +1,37 @@
 // Replace the ROI with your actual region of interest and update the parameters below with the corresponding values for your study area.// Define map center within ROI
-Map.setCenter(29.67, 45.15, 9);
+Map.setCenter(12.24, 41.70, 9);
 
-// Define the region of interest (ROI) - Delta
-// add as many point as needed then adjust in the script
-// you can also use the point creator tool in the GEE map when assigning a point variable
-var roi_point = ee.Geometry.Point(28.022, 45.357); // ROI_Head
-var roi_point2 = ee.Geometry.Point(29.67, 45.15); // ROI (outlet)
+
+var roi_point = ee.Geometry.Point(12.2341898300302, 41.74083766037203); // Fiumara Grande
+
+var roi_point2 = ee.Geometry.Point(12.219320422173494, 41.77135301774834); // Fiumicino
+//var roi_point2 = Danube_Sulina_adjusted - same as roi_point2 but based on the point creator tool, so need to provide coordinates 
 
 // Define the region of interest (ROI) as a polygon
+// Define the new ROI polygon
 var roi_poly = ee.Geometry.Polygon([
   [
-    [26.004639, 47.129951],
-    [25.43335, 45.966425],
-    [24.664307, 44.699898],
-    [30.750732, 43.004647],
-    [32.299805, 45.506347],
-    [26.004639, 47.129951]
+    [11.88, 41.48],
+    [11.88, 41.92],
+    [12.55, 41.92],
+    [12.60, 41.48],
+    [11.88, 41.48]
   ]
 ]);
 
-// Optional: visualize
-Map.centerObject(roi_poly, 6); // Zoom out to see the whole polygon
-Map.addLayer(roi_poly, {color: 'blue'}, 'ROI Polygon'); //add blue color to layer
+
 // Clip collection (Landsat 8 & 9, collection 2, tier 1, L2 imagery to ROI
 var l8 = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2');
 var l9 = ee.ImageCollection('LANDSAT/LC09/C02/T1_L2');
 var l8_9 = ee.ImageCollection(l8.merge(l9))
-                  .filter(ee.Filter.date('2019-01-01', '2022-12-31')) // change this with you dates of interest
+                  .filter(ee.Filter.date('2020-01-01', '2023-09-30')) // change this
                   .sort('DATE_ACQUIRED')
                   .filter(ee.Filter.or(
-                                ee.Filter.and(ee.Filter.eq('WRS_PATH', 181),     // change WRS_path and WRS_row depending on the ROI
-                                ee.Filter.eq('WRS_ROW', 28)),
-                                ee.Filter.and(ee.Filter.eq('WRS_PATH', 181), 
-                                ee.Filter.eq('WRS_ROW', 29)),
-                                ee.Filter.and(ee.Filter.eq('WRS_PATH', 180), 
-                                ee.Filter.eq('WRS_ROW', 28)),
-                                ee.Filter.and(ee.Filter.eq('WRS_PATH', 180), 
-                                ee.Filter.eq('WRS_ROW', 29))))
-                  .filterBounds(roi_poly);//keep this
+                                ee.Filter.and(ee.Filter.eq('WRS_PATH', 191),     // change WRS_path and WRS_row depending on the study area  
+                                ee.Filter.eq('WRS_ROW', 31)),
+                                ee.Filter.and(ee.Filter.eq('WRS_PATH', 190), 
+                                ee.Filter.eq('WRS_ROW', 31))))
+                  .filterBounds(roi_poly);
 print ('selected paths, no cmask', l8_9);
                   
 function clp(img) {
@@ -118,7 +112,7 @@ var sst_chart_celsius = ui.Chart.image.series({
   interpolateNulls: true,
   lineWidth: 1,
   pointSize: 3,
-  title: 'SST trial (Landsat 8/9, atmospherically corrected, ROI_Head, no offset)',
+  title: 'SST trial (Landsat 8/9, atmospherically corrected, Tiber_Head, no offset)',
   vAxis: { title: 'Surface Temp (in Celsius)' },
   hAxis: { title: 'Date', format: 'YYYY-MMM', gridlines: { count: 12 } },
 });
@@ -196,8 +190,8 @@ print (Landsat_with_BT_celsius_offset_masked, 'Landsat_with_BT_celsius_offset_ma
 // https://gis.stackexchange.com/questions/280156/mosaicking-image-collection-by-date-day-in-google-earth-engine
 var roi = roi_poly;
 
-var start = ee.Date('2019-01-01'); // change date
-var finish = ee.Date('2022-12-31'); // change date
+var start = ee.Date('2020-01-01'); // change date
+var finish = ee.Date('2023-09-30'); // change date
 
 var imcol = Landsat_with_BT_celsius_offset_masked
 .filterDate(start, finish)
@@ -288,7 +282,7 @@ var temperatureChart = ui.Chart.feature.byFeature({
 });
 
 // Display the chart
-print(temperatureChart, "temp_final_mosaicked by date, ROI_(Head)");
+print(temperatureChart, "temp_final_mosaicked by date Fiumara Grande");
 
 
 
@@ -328,23 +322,23 @@ var temperatureChart = ui.Chart.feature.byFeature({
 });
 
 // Display the chart
-print(temperatureChart, "temp_final_mosaicked by date, Sulina (outlet)");
+print(temperatureChart, "temp_final_mosaicked by date, Fiumicino");
 
 
 
 //// EXPORT IN GEOTIFF FORMAT - 1 month/year per batch ////
 var final_data = ic_m
-.filterDate("2020-01-01", "2020-12-31") // change this for a one year extraction
+.filterDate("2023-01-01", "2023-01-10")  // change this
 .select('Temp_celsius_final');
 
 // defining export parameters
 var exportArgs = {
-  folder: "ROI_2020",
+  folder: "Tiber2023",
   region: roi_poly,
   scale: 30,
   crs: "epsg:4326", // WGS84
   fileFormat: "GeoTIFF",
-  maxPixels: 1e9, // for 
+  maxPixels: 1e9, // for Danube
   formatOptions: {
     cloudOptimized: true
   }
@@ -361,14 +355,15 @@ for(var i = 0; i<numImages; i++) {
   
   // get the date of the image
 //  var date = ee.Date(image.get('DATE_ACQUIRED')).format('yyyy-mm-dd');
-  var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd');
+  var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd').getInfo();
+
 
   
   exportArgs.image = image;
-  
-  exportArgs.fileNamePrefix = "temperature_ROI" + date.getInfo();
+  exportArgs.fileNamePrefix = 'temperature_' + date;
 
   
+
 // export the images - THIS IS THE FINAL OUTPUT
 Export.image.toDrive(exportArgs);
 }
@@ -386,7 +381,7 @@ var dateAndTimeCollection = Landsat_with_BT_celsius_offset_masked.map(function(i
 
 Export.table.toDrive({
   collection: dateAndTimeCollection,
-  description: 'Date_SceneCenterTime_ROI', //adjust folder name
-  folder: 'SurfaceTemp_GEE_ROI', // Adjust the folder as needed
+  description: 'Date_SceneCenterTime_Tiber',
+  folder: 'SurfaceTemp_GEE_Tiber', // Adjust the folder as needed
   fileFormat: 'CSV'
 });
